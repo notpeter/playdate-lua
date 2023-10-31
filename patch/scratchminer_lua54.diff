@@ -265,3 +265,17 @@ index e7781dbf..6dbc6a8f 100644
        vmcase(OP_LOADFALSE) {
          setbfvalue(s2v(ra));
          vmbreak;
+diff --git a/luac.c b/luac.c
+index 56ddc414..349cee5d 100644
+--- a/luac.c
++++ b/luac.c
+@@ -372,6 +372,9 @@ static void PrintCode(const Proto* f)
+ 	printf("%d",a);
+ 	printf(COMMENT); PrintConstant(f,EXTRAARG);
+ 	break;
++   case OP_LOADBOOL:
++	printf("%d", a);
++	break;
+    case OP_LOADFALSE:
+ 	printf("%d",a);
+ 	break;
