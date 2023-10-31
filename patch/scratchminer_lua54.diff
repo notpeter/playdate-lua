@@ -1,0 +1,267 @@
+diff --git b/ljumptab.h a/ljumptab.h
+index 8306f250..d9e6077c 100644
+--- b/ljumptab.h
++++ a/ljumptab.h
+@@ -30,9 +30,7 @@ static const void *const disptab[NUM_OPCODES] = {
+ &&L_OP_LOADF,
+ &&L_OP_LOADK,
+ &&L_OP_LOADKX,
+-&&L_OP_LOADFALSE,
+-&&L_OP_LFALSESKIP,
+-&&L_OP_LOADTRUE,
++&&L_OP_LOADBOOL,
+ &&L_OP_LOADNIL,
+ &&L_OP_GETUPVAL,
+ &&L_OP_SETUPVAL,
+@@ -107,6 +105,8 @@ static const void *const disptab[NUM_OPCODES] = {
+ &&L_OP_CLOSURE,
+ &&L_OP_VARARG,
+ &&L_OP_VARARGPREP,
+-&&L_OP_EXTRAARG
+-
++&&L_OP_EXTRAARG,
++&&L_OP_LOADFALSE,
++&&L_OP_LFALSESKIP,
++&&L_OP_LOADTRUE,
+ };
+diff --git b/lobject.h a/lobject.h
+index 04a81d3d..e7cf63f8 100644
+--- b/lobject.h
++++ a/lobject.h
+@@ -297,6 +297,7 @@ typedef struct GCObject {
+ /* Variant tags for numbers */
+ #define LUA_VNUMINT	makevariant(LUA_TNUMBER, 0)  /* integer numbers */
+ #define LUA_VNUMFLT	makevariant(LUA_TNUMBER, 1)  /* float numbers */
++#define LUA_VNUMINT_LEGACY makevariant(LUA_TNUMBER, 2)  /* integer numbers (v5.4.0-beta) */
+ 
+ #define ttisnumber(o)		checktype((o), LUA_TNUMBER)
+ #define ttisfloat(o)		checktag((o), LUA_VNUMFLT)
+diff --git b/lopcodes.c a/lopcodes.c
+index c67aa227..642ea817 100644
+--- b/lopcodes.c
++++ a/lopcodes.c
+@@ -22,9 +22,7 @@ LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
+  ,opmode(0, 0, 0, 0, 1, iAsBx)		/* OP_LOADF */
+  ,opmode(0, 0, 0, 0, 1, iABx)		/* OP_LOADK */
+  ,opmode(0, 0, 0, 0, 1, iABx)		/* OP_LOADKX */
+- ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADFALSE */
+- ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LFALSESKIP */
+- ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADTRUE */
++ ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADBOOL */
+  ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADNIL */
+  ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_GETUPVAL */
+  ,opmode(0, 0, 0, 0, 0, iABC)		/* OP_SETUPVAL */
+@@ -100,5 +98,8 @@ LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
+  ,opmode(0, 1, 0, 0, 1, iABC)		/* OP_VARARG */
+  ,opmode(0, 0, 1, 0, 1, iABC)		/* OP_VARARGPREP */
+  ,opmode(0, 0, 0, 0, 0, iAx)		/* OP_EXTRAARG */
++ ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADFALSE */
++ ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LFALSESKIP */
++ ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADTRUE */
+ };
+ 
+diff --git b/lopcodes.h a/lopcodes.h
+index 122e5d21..8a1b23d6 100644
+--- b/lopcodes.h
++++ a/lopcodes.h
+@@ -202,9 +202,7 @@ OP_LOADI,/*	A sBx	R[A] := sBx					*/
+ OP_LOADF,/*	A sBx	R[A] := (lua_Number)sBx				*/
+ OP_LOADK,/*	A Bx	R[A] := K[Bx]					*/
+ OP_LOADKX,/*	A	R[A] := K[extra arg]				*/
+-OP_LOADFALSE,/*	A	R[A] := false					*/
+-OP_LFALSESKIP,/*A	R[A] := false; pc++				*/
+-OP_LOADTRUE,/*	A	R[A] := true					*/
++OP_LOADBOOL,/* A B C    R(A) := (Bool)B; if (C) pc++ */
+ OP_LOADNIL,/*	A B	R[A], R[A+1], ..., R[A+B] := nil		*/
+ OP_GETUPVAL,/*	A B	R[A] := UpValue[B]				*/
+ OP_SETUPVAL,/*	A B	UpValue[B] := R[A]				*/
+@@ -305,11 +303,16 @@ OP_VARARG,/*	A C	R[A], R[A+1], ..., R[A+C-2] = vararg		*/
+ 
+ OP_VARARGPREP,/*A	(adjust vararg parameters)			*/
+ 
+-OP_EXTRAARG/*	Ax	extra (larger) argument for previous opcode	*/
++OP_EXTRAARG,/*	Ax	extra (larger) argument for previous opcode	*/
++
++OP_LOADFALSE,/*	A	R[A] := false					*/
++OP_LFALSESKIP,/*A	R[A] := false; pc++				*/
++OP_LOADTRUE,/*	A	R[A] := true					*/
++
+ } OpCode;
+ 
+ 
+-#define NUM_OPCODES	((int)(OP_EXTRAARG) + 1)
++#define NUM_OPCODES	((int)(OP_LOADTRUE) + 1)
+ 
+ 
+ 
+diff --git b/lopnames.h a/lopnames.h
+index 965cec9b..dfbc8559 100644
+--- b/lopnames.h
++++ a/lopnames.h
+@@ -18,9 +18,7 @@ static const char *const opnames[] = {
+   "LOADF",
+   "LOADK",
+   "LOADKX",
+-  "LOADFALSE",
+-  "LFALSESKIP",
+-  "LOADTRUE",
++  "LOADBOOL",
+   "LOADNIL",
+   "GETUPVAL",
+   "SETUPVAL",
+@@ -96,6 +94,9 @@ static const char *const opnames[] = {
+   "VARARG",
+   "VARARGPREP",
+   "EXTRAARG",
++  "LOADFALSE",
++  "LFALSESKIP",
++  "LOADTRUE",
+   NULL
+ };
+ 
+diff --git b/luaconf.h a/luaconf.h
+index bdf927e7..e3214610 100644
+--- b/luaconf.h
++++ a/luaconf.h
+@@ -103,7 +103,7 @@
+ /*
+ @@ LUA_32BITS enables Lua with 32-bit integers and 32-bit floats.
+ */
+-/* #define LUA_32BITS */
++#define LUA_32BITS 1
+ 
+ 
+ /*
+diff --git b/lundump.c a/lundump.c
+index 4243678a..e93c7a93 100644
+--- b/lundump.c
++++ a/lundump.c
+@@ -36,6 +36,7 @@ typedef struct {
+   const char *name;
+ } LoadState;
+ 
++static int compatMode;
+ 
+ static l_noret error (LoadState *S, const char *why) {
+   luaO_pushfstring(S->L, "%s: bad binary format (%s)", S->name, why);
+@@ -159,27 +160,51 @@ static void loadConstants (LoadState *S, Proto *f) {
+   for (i = 0; i < n; i++) {
+     TValue *o = &f->k[i];
+     int t = loadByte(S);
+-    switch (t) {
+-      case LUA_VNIL:
+-        setnilvalue(o);
+-        break;
+-      case LUA_VFALSE:
+-        setbfvalue(o);
+-        break;
+-      case LUA_VTRUE:
+-        setbtvalue(o);
+-        break;
+-      case LUA_VNUMFLT:
+-        setfltvalue(o, loadNumber(S));
+-        break;
+-      case LUA_VNUMINT:
+-        setivalue(o, loadInteger(S));
+-        break;
+-      case LUA_VSHRSTR:
+-      case LUA_VLNGSTR:
+-        setsvalue2n(S->L, o, loadString(S, f));
+-        break;
+-      default: lua_assert(0);
++    if (compatMode) {
++      switch (t) {
++        case LUA_VNIL:
++          setnilvalue(o);
++          break;
++        case LUA_TBOOLEAN:
++          loadByte(S) ? setbtvalue(o) : setbfvalue(o);
++          break;
++        case LUA_VNUMFLT:
++          setfltvalue(o, loadNumber(S));
++          break;
++        case LUA_VNUMINT:
++        case LUA_VNUMINT_LEGACY:
++          setivalue(o, loadInteger(S));
++          break;
++        case LUA_VSHRSTR:
++        case LUA_VLNGSTR:
++          setsvalue2n(S->L, o, loadString(S, f));
++          break;
++        default: lua_assert(0);
++      }
++    }
++    else {
++      switch (t) {
++        case LUA_VNIL:
++          setnilvalue(o);
++          break;
++        case LUA_VFALSE:
++          setbfvalue(o);
++          break;
++        case LUA_VTRUE:
++          setbtvalue(o);
++          break;
++        case LUA_VNUMFLT:
++          setfltvalue(o, loadNumber(S));
++          break;
++        case LUA_VNUMINT:
++          setivalue(o, loadInteger(S));
++          break;
++        case LUA_VSHRSTR:
++        case LUA_VLNGSTR:
++          setsvalue2n(S->L, o, loadString(S, f));
++          break;
++        default: lua_assert(0);
++      }
+     }
+   }
+ }
+@@ -280,10 +305,16 @@ static void fchecksize (LoadState *S, size_t size, const char *tname) {
+ static void checkHeader (LoadState *S) {
+   /* skip 1st char (already read and checked) */
+   checkliteral(S, &LUA_SIGNATURE[1], "not a binary chunk");
+-  if (loadByte(S) != LUAC_VERSION)
+-    error(S, "version mismatch");
++  lu_byte version = loadByte(S);
++  if (version != LUAC_VERSION) {
++	  if(((loadByte(S) << 7) | version) != LUAC_LEGACY_VERSION) error(S, "version mismatch");
++    else compatMode = 1;
++  }
++  else {
++    compatMode = 0;
++  }
+   if (loadByte(S) != LUAC_FORMAT)
+-    error(S, "format mismatch");
++	error(S, "format mismatch");
+   checkliteral(S, LUAC_DATA, "corrupted chunk");
+   checksize(S, Instruction);
+   checksize(S, lua_Integer);
+diff --git b/lundump.h a/lundump.h
+index f3748a99..6598add1 100644
+--- b/lundump.h
++++ a/lundump.h
+@@ -23,6 +23,7 @@
+ */
+ #define MYINT(s)	(s[0]-'0')  /* assume one-digit numerals */
+ #define LUAC_VERSION	(MYINT(LUA_VERSION_MAJOR)*16+MYINT(LUA_VERSION_MINOR))
++#define LUAC_LEGACY_VERSION		LUA_VERSION_NUM /* for older Playdate apps */
+ 
+ #define LUAC_FORMAT	0	/* this is the official format */
+ 
+diff --git b/lvm.c a/lvm.c
+index e7781dbf..6dbc6a8f 100644
+--- b/lvm.c
++++ a/lvm.c
+@@ -1181,6 +1181,11 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
+         setobj2s(L, ra, rb);
+         vmbreak;
+       }
++      vmcase(OP_LOADBOOL) {
++        GETARG_B(i) ? setbtvalue(s2v(ra)) : setbfvalue(s2v(ra));
++        if (GETARG_C(i)) pc++;  /* skip next instruction (if C) */
++        vmbreak;
++      }
+       vmcase(OP_LOADFALSE) {
+         setbfvalue(s2v(ra));
+         vmbreak;
