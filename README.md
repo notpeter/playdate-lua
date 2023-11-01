@@ -48,7 +48,9 @@ The `import` function is unused at runtime.
 ```
 git clone https://github.com/notpeter/playdate-lua
 cd plakydate-lua
-git submodule update --init
+cd build
+cmake ..
+make
 ```
 
 TBD
