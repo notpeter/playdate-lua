@@ -22,7 +22,7 @@ build/lua-prefix/src/lua/src/luac
 
 ### Clean
 
-To make a clean build reset the build dir to git first
+Clean by reseting the build dir:
 
 ```sh
 git clean -fdx build
