@@ -1,4 +1,4 @@
-#!/usr/bin/env playdate-lua
+#!/usr/bin/env pd-lua
 
 local function assert_equal(actual, expected, label)
     if actual ~= expected then
