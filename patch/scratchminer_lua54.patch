@@ -212,7 +212,7 @@ index 4243678a..e93c7a93 100644
 -    error(S, "version mismatch");
 +  lu_byte version = loadByte(S);
 +  if (version != LUAC_VERSION) {
-+	  if(((loadByte(S) << 7) | version) != LUAC_LEGACY_VERSION) error(S, "version mismatch");
++    if(((loadByte(S) << 7) | version) != LUAC_LEGACY_VERSION) error(S, "version mismatch");
 +    else compatMode = 1;
 +  }
 +  else {
@@ -220,7 +220,7 @@ index 4243678a..e93c7a93 100644
 +  }
    if (loadByte(S) != LUAC_FORMAT)
 -    error(S, "format mismatch");
-+	error(S, "format mismatch");
++    error(S, "format mismatch");
    checkliteral(S, LUAC_DATA, "corrupted chunk");
    checksize(S, Instruction);
    checksize(S, lua_Integer);
