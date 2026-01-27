@@ -88,6 +88,12 @@ with little gain."
 and [2020-01](http://lua-users.org/lists/lua-l/2020-01/threads.html#00009)
 * License: UNKNOWN
 
+### Table Additions
+
+Adds Playdate convenience functions for table handling:
+`table.indexOfElement`, `table.getsize`, `table.create`, `table.shallowcopy`,
+`table.deepcopy`.
+
 ### Magic Bytes
 
 Add backwards compatibility to handle compiled with earlier PlaydateSDK versions

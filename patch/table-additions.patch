@@ -1,0 +1,156 @@
+--- a/ltablib.c
++++ b/ltablib.c
+@@ -18,6 +18,8 @@
+ 
+ #include "lauxlib.h"
+ #include "lualib.h"
++#include "lobject.h"
++#include "ltable.h"
+ 
+ 
+ /*
+@@ -167,6 +169,132 @@
+   if (i == last)  /* add last value (if interval was not empty) */
+     addfield(L, &b, i);
+   luaL_pushresult(&b);
++  return 1;
++}
++
++
++static void tableallocsizes (lua_State *L, int index, int *narr, int *nrec) {
++  Table *t = (Table *)lua_topointer(L, index);
++  unsigned int asize = luaH_realasize(t);
++  unsigned int hsize = allocsizenode(t);
++  *narr = (asize > INT_MAX) ? INT_MAX : (int)asize;
++  *nrec = (hsize > INT_MAX) ? INT_MAX : (int)hsize;
++}
++
++
++static int tindexofelement (lua_State *L) {
++  lua_Integer n;
++  lua_Integer i;
++  checktab(L, 1, TAB_R);
++  luaL_checkany(L, 2);
++  n = aux_getn(L, 1, TAB_R);
++  for (i = 1; i <= n; i++) {
++    lua_geti(L, 1, i);
++    if (lua_compare(L, -1, 2, LUA_OPEQ)) {
++      lua_pop(L, 1);
++      lua_pushinteger(L, i);
++      return 1;
++    }
++    lua_pop(L, 1);
++  }
++  return 0;
++}
++
++
++static int tgetsize (lua_State *L) {
++  Table *t;
++  unsigned int asize;
++  unsigned int hsize;
++  luaL_checktype(L, 1, LUA_TTABLE);
++  t = (Table *)lua_topointer(L, 1);
++  asize = luaH_realasize(t);
++  hsize = allocsizenode(t);
++  lua_pushinteger(L, (lua_Integer)asize);
++  lua_pushinteger(L, (lua_Integer)hsize);
++  return 2;
++}
++
++
++static int tcreate (lua_State *L) {
++  lua_Integer narr = luaL_checkinteger(L, 1);
++  lua_Integer nrec = luaL_checkinteger(L, 2);
++  luaL_argcheck(L, narr >= 0 && narr <= INT_MAX, 1,
++               "array size out of range");
++  luaL_argcheck(L, nrec >= 0 && nrec <= INT_MAX, 2,
++               "hash size out of range");
++  lua_createtable(L, (int)narr, (int)nrec);
++  return 1;
++}
++
++
++static int tshallowcopy (lua_State *L) {
++  int dest;
++  luaL_checktype(L, 1, LUA_TTABLE);
++  if (!lua_isnoneornil(L, 2)) {
++    luaL_checktype(L, 2, LUA_TTABLE);
++    lua_settop(L, 2);
++    dest = 2;
++  }
++  else {
++    int narr;
++    int nrec;
++    lua_settop(L, 1);
++    tableallocsizes(L, 1, &narr, &nrec);
++    lua_createtable(L, narr, nrec);
++    dest = 2;
++  }
++  lua_pushnil(L);
++  while (lua_next(L, 1) != 0) {
++    lua_pushvalue(L, -2);
++    lua_pushvalue(L, -2);
++    lua_settable(L, dest);
++    lua_pop(L, 1);
++  }
++  return 1;
++}
++
++
++static void deepcopy_value (lua_State *L, int index, int cache) {
++  int abs_index = lua_absindex(L, index);
++  int abs_cache = lua_absindex(L, cache);
++  if (!lua_istable(L, abs_index)) {
++    lua_pushvalue(L, abs_index);
++    return;
++  }
++  lua_pushvalue(L, abs_index);
++  lua_rawget(L, abs_cache);
++  if (!lua_isnil(L, -1))
++    return;
++  lua_pop(L, 1);
++  {
++    Table *t = (Table *)lua_topointer(L, abs_index);
++    unsigned int asize = luaH_realasize(t);
++    unsigned int hsize = allocsizenode(t);
++    int narr = (asize > INT_MAX) ? INT_MAX : (int)asize;
++    int nrec = (hsize > INT_MAX) ? INT_MAX : (int)hsize;
++    lua_createtable(L, narr, nrec);
++  }
++  {
++    int copy = lua_gettop(L);
++    lua_pushvalue(L, abs_index);
++    lua_pushvalue(L, copy);
++    lua_rawset(L, abs_cache);
++    lua_pushnil(L);
++    while (lua_next(L, abs_index) != 0) {
++      deepcopy_value(L, -2, abs_cache);
++      deepcopy_value(L, -2, abs_cache);
++      lua_settable(L, copy);
++      lua_pop(L, 1);
++    }
++  }
++}
++
++
++static int tdeepcopy (lua_State *L) {
++  luaL_checktype(L, 1, LUA_TTABLE);
++  lua_settop(L, 1);
++  lua_newtable(L);
++  deepcopy_value(L, 1, 2);
+   return 1;
+ }
+ 
+@@ -416,6 +544,11 @@
+   {"unpack", tunpack},
+   {"remove", tremove},
+   {"move", tmove},
++  {"indexOfElement", tindexofelement},
++  {"getsize", tgetsize},
++  {"create", tcreate},
++  {"shallowcopy", tshallowcopy},
++  {"deepcopy", tdeepcopy},
+   {"sort", sort},
+   {NULL, NULL}
+ };
