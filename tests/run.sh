@@ -11,3 +11,5 @@ if [ ! -x "$LUA_BIN" ]; then
 fi
 
 "$LUA_BIN" "$ROOT_DIR/tests/table_additions.lua"
+"$LUA_BIN" "$ROOT_DIR/tests/operator_additions.lua"
+"$LUA_BIN" "$ROOT_DIR/tests/build_config.lua"

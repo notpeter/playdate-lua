@@ -1,7 +1,9 @@
+#!/usr/bin/env playdate-lua
+
 local function assert_equal(actual, expected, label)
-  if actual ~= expected then
-    error(string.format("%s: expected %s, got %s", label, tostring(expected), tostring(actual)))
-  end
+    if actual ~= expected then
+        error(string.format("%s: expected %s, got %s", label, tostring(expected), tostring(actual)))
+    end
 end
 
 local t = table.create(3, 2)
@@ -16,14 +18,14 @@ local array_count, hash_count = table.getsize(t)
 assert_equal(array_count, 3, "getsize array")
 assert_equal(hash_count, 2, "getsize hash")
 
-local shallow = table.shallowcopy({1, {2}})
+local shallow = table.shallowcopy({ 1, { 2 } })
 assert_equal(shallow[1], 1, "shallowcopy value")
 assert_equal(type(shallow[2]), "table", "shallowcopy nested type")
 
-local deep = table.deepcopy({1, {2}})
+local deep = table.deepcopy({ 1, { 2 } })
 assert_equal(deep[1], 1, "deepcopy value")
 if deep[2] == shallow[2] then
-  error("deepcopy nested table should be copied")
+    error("deepcopy nested table should be copied")
 end
 
 local a = {}
