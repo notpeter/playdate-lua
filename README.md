@@ -10,7 +10,7 @@ Panic Inc or PUC-Lua. Please don't ask them for help.
 
 ## Background
 
-Playdate Lua is basically vanilla [PUC Lua 5.4.0](https://www.lua.org/) with a few changes:
+Playdate Lua is basically vanilla [PUC Lua 5.4.3](https://www.lua.org/) with a few changes:
 
 1. Apply [patches/lua32.patch](patches/lua32.patch) setting `LUA_32BITS 1`
 
@@ -19,7 +19,7 @@ Playdate Lua is basically vanilla [PUC Lua 5.4.0](https://www.lua.org/) with a f
 
 2. Apply [patches/scratchminer.patch](patches/scratchminer.patch) (Author: [@scratchminer](https://github.com/scratchminer)):
 
-- Support both `5.4.0` and `5.4.0-beta` magic bytes. See [MagicBytes](#magic-bytes)
+- Support both `5.4.x` (non-beta) and `5.4.0-beta` magic bytes. See [MagicBytes](#magic-bytes)
 - When `5.4.0-beta` magic bytes are found support alternate opcode numbering/order.
 
 3. Apply [patches/compound-assign.patch](patches/compound-assign.patch) adapted from [patches/plusequals-5.4.0-beta.patch](patches/plusequals-5.4.0-beta.patch) (author: Dave Hayden)

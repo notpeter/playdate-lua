@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24.0)
 cmake_policy(VERSION 3.24.0)
 include(ExternalProject)
 
-project(playdate-lua LANGUAGES C VERSION 5.4.0)
+project(playdate-lua LANGUAGES C VERSION 5.4.3)
 
 ExternalProject_Add(lua
   URL "https://www.lua.org/ftp/lua-5.4.3.tar.gz"

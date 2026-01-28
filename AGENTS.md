@@ -1,6 +1,6 @@
 # Playdate Lua
 
-This repository builds a patched Lua 5.4.0 with some additional patches.
+This repository builds a patched Lua 5.4.3 with some additional patches.
 It is meant to emulate a closed source lua distribution: Playdate Lua
 shipped as part of the PlaydateSDK and Panic Playdate game console.
 This closed source, but we attempt to closely mirror its functionality here.
