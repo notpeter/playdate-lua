@@ -1,7 +1,7 @@
-diff --git ljumptab.h ljumptab.h
+diff --git a/ljumptab.h b/ljumptab.h
 index 8306f25..faf811a 100644
---- ljumptab.h
-+++ ljumptab.h
+--- a/ljumptab.h
++++ b/ljumptab.h
 @@ -30,9 +30,7 @@ static const void *const disptab[NUM_OPCODES] = {
  &&L_OP_LOADF,
  &&L_OP_LOADK,
@@ -24,10 +24,10 @@ index 8306f25..faf811a 100644
 +&&L_OP_LOADTRUE
  
  };
-diff --git lobject.h lobject.h
+diff --git a/lobject.h b/lobject.h
 index 950bebb..f80a8ff 100644
---- lobject.h
-+++ lobject.h
+--- a/lobject.h
++++ b/lobject.h
 @@ -309,6 +309,7 @@ typedef struct GCObject {
  /* Variant tags for numbers */
  #define LUA_VNUMINT	makevariant(LUA_TNUMBER, 0)  /* integer numbers */
@@ -41,10 +41,10 @@ index 950bebb..f80a8ff 100644
  
  #endif
 -
-diff --git lopcodes.c lopcodes.c
+diff --git a/lopcodes.c b/lopcodes.c
 index c67aa22..6c10edf 100644
---- lopcodes.c
-+++ lopcodes.c
+--- a/lopcodes.c
++++ b/lopcodes.c
 @@ -22,9 +22,7 @@ LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
   ,opmode(0, 0, 0, 0, 1, iAsBx)		/* OP_LOADF */
   ,opmode(0, 0, 0, 0, 1, iABx)		/* OP_LOADK */
@@ -65,10 +65,10 @@ index c67aa22..6c10edf 100644
 + ,opmode(0, 0, 0, 0, 1, iABC)		/* OP_LOADTRUE */
  };
 -
-diff --git lopcodes.h lopcodes.h
+diff --git a/lopcodes.h b/lopcodes.h
 index d6a47e5..e2d06d7 100644
---- lopcodes.h
-+++ lopcodes.h
+--- a/lopcodes.h
++++ b/lopcodes.h
 @@ -202,9 +202,7 @@ OP_LOADI,/*	A sBx	R[A] := sBx					*/
  OP_LOADF,/*	A sBx	R[A] := (lua_Number)sBx				*/
  OP_LOADK,/*	A Bx	R[A] := K[Bx]					*/
@@ -98,10 +98,10 @@ index d6a47e5..e2d06d7 100644
  
  
  
-diff --git lopnames.h lopnames.h
+diff --git a/lopnames.h b/lopnames.h
 index 965cec9..ed27af6 100644
---- lopnames.h
-+++ lopnames.h
+--- a/lopnames.h
++++ b/lopnames.h
 @@ -18,9 +18,7 @@ static const char *const opnames[] = {
    "LOADF",
    "LOADK",
@@ -125,10 +125,10 @@ index 965cec9..ed27af6 100644
  
  #endif
 -
-diff --git luac.c luac.c
+diff --git a/luac.c b/luac.c
 index 56ddc41..349cee5 100644
---- luac.c
-+++ luac.c
+--- a/luac.c
++++ b/luac.c
 @@ -372,6 +372,9 @@ static void PrintCode(const Proto* f)
  	printf("%d",a);
  	printf(COMMENT); PrintConstant(f,EXTRAARG);
@@ -139,10 +139,10 @@ index 56ddc41..349cee5 100644
     case OP_LOADFALSE:
  	printf("%d",a);
  	break;
-diff --git lundump.c lundump.c
+diff --git a/lundump.c b/lundump.c
 index 5aa55c4..488f76c 100644
---- lundump.c
-+++ lundump.c
+--- a/lundump.c
++++ b/lundump.c
 @@ -36,6 +36,8 @@ typedef struct {
    const char *name;
  } LoadState;
@@ -248,10 +248,10 @@ index 5aa55c4..488f76c 100644
    return cl;
  }
 -
-diff --git lundump.h lundump.h
+diff --git a/lundump.h b/lundump.h
 index f3748a9..6598add 100644
---- lundump.h
-+++ lundump.h
+--- a/lundump.h
++++ b/lundump.h
 @@ -23,6 +23,7 @@
  */
  #define MYINT(s)	(s[0]-'0')  /* assume one-digit numerals */
@@ -260,10 +260,10 @@ index f3748a9..6598add 100644
  
  #define LUAC_FORMAT	0	/* this is the official format */
  
-diff --git lvm.c lvm.c
+diff --git a/lvm.c b/lvm.c
 index c9729bc..ff3ef21 100644
---- lvm.c
-+++ lvm.c
+--- a/lvm.c
++++ b/lvm.c
 @@ -1188,6 +1188,11 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
          setobj2s(L, ra, rb);
          vmbreak;
