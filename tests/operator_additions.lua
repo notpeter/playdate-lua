@@ -39,7 +39,8 @@ assert_equal(c, 2, "bit and equals")
 c |= 9
 assert_equal(c, 11, "bit or equals")
 
-c ^= 10
-assert_equal(c, 1, "bit xor equals")
+c = 2
+c ^= 3
+assert_equal(c, 8, "exponent equals")
 
 print("operator additions tests passed")
