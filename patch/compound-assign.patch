@@ -121,7 +121,7 @@ index 284ef1f0..e85c83fe 100644
 +    case TK_SHREQ: return OPR_SHR;
 +    case TK_BANDEQ: return OPR_BAND;
 +    case TK_BOREQ: return OPR_BOR;
-+    case TK_BXOREQ: return OPR_BXOR;
++    case TK_BXOREQ: return OPR_POW;
      default: return OPR_NOBINOPR;
    }
  }
