@@ -1,3 +1,5 @@
+diff --git a/ltablib.c b/ltablib.c
+index d80eb801..bc2101a8 100644
 --- a/ltablib.c
 +++ b/ltablib.c
 @@ -18,6 +18,8 @@
@@ -9,14 +11,10 @@
  
  
  /*
-@@ -167,6 +169,132 @@
-   if (i == last)  /* add last value (if interval was not empty) */
-     addfield(L, &b, i);
-   luaL_pushresult(&b);
-+  return 1;
-+}
-+
-+
+@@ -171,6 +173,132 @@ static int tconcat (lua_State *L) {
+ }
+ 
+ 
 +static void tableallocsizes (lua_State *L, int index, int *narr, int *nrec) {
 +  Table *t = (Table *)lua_topointer(L, index);
 +  unsigned int asize = luaH_realasize(t);
@@ -139,10 +137,14 @@
 +  lua_settop(L, 1);
 +  lua_newtable(L);
 +  deepcopy_value(L, 1, 2);
-   return 1;
- }
- 
-@@ -416,6 +544,11 @@
++  return 1;
++}
++
++
+ /*
+ ** {======================================================
+ ** Pack/unpack
+@@ -417,6 +545,11 @@ static const luaL_Reg tab_funcs[] = {
    {"unpack", tunpack},
    {"remove", tremove},
    {"move", tmove},

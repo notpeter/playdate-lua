@@ -23,5 +23,5 @@ apply_patch() {
 
 apply_patch "lua32" "lua32.patch" "$SRC_DIR"
 apply_patch "scratchminer" "scratchminer.patch" "$SRC_DIR"
-# apply_patch "compound_assign" "compound-assign.patch" "$SRC_DIR"
-# apply_patch "table_additions" "table-additions.patch" "$SRC_DIR"
+apply_patch "compound_assign" "compound-assign.patch" "$SRC_DIR"
+apply_patch "table_additions" "table-additions.patch" "$SRC_DIR"
