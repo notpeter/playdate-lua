@@ -22,7 +22,8 @@ build/lua-prefix/src/lua/src/luac
 
 See: `patch/apply-patches.sh` for how patches are applied.
 
-- `patch/scratchminer_lua54.patch`: Enables backwards support for Lua byte code compiled with 5.4.0-beta
+- `patch/lua32.patch`: Enable 32bit lua
+- `patch/scratchminer.patch`: Enables backwards support for Lua byte code compiled with 5.4.0-beta
   - Adds `OP_LOADBOOL` which was included 5.4.0-beta but removed in 5.4.0
   - Support alternate magic bytes from beta release
   - Support alternate byte code numbering ordering used by old bytecode
