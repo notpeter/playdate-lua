@@ -10,16 +10,16 @@ Panic Inc or PUC-Lua. Please don't ask them for help.
 
 ## Background
 
-Playdate Lua is basically vanilla [PUC Lua 5.4.0](https://www.lua.org/) with a few changes:
+Playdate Lua is basically vanilla [PUC Lua 5.4.3](https://www.lua.org/) with a few changes:
 
-1. Compile choices: `LUA_32BITS`
+1. Apply [patches/lua32.patch](patches/lua32.patch) setting `LUA_32BITS 1`
 
 - Use `float` for `number` instead of `double` (32bit instead of 64bit)
 - Use `int32_t` for `integer` instead of `int64_t` (32bit instead of 64bit)
 
-2. Apply [patches/scratchminer_lua54.patch](patches/scratchminer_lua54.patch) (Author: [@scratchminer](https://github.com/scratchminer)):
+2. Apply [patches/scratchminer.patch](patches/scratchminer.patch) (Author: [@scratchminer](https://github.com/scratchminer)):
 
-- Support both `5.4.0` and `5.4.0-beta` magic bytes. See [MagicBytes](#magic-bytes)
+- Support both `5.4.x` (non-beta) and `5.4.0-beta` magic bytes. See [MagicBytes](#magic-bytes)
 - When `5.4.0-beta` magic bytes are found support alternate opcode numbering/order.
 
 3. Apply [patches/compound-assign.patch](patches/compound-assign.patch) adapted from [patches/plusequals-5.4.0-beta.patch](patches/plusequals-5.4.0-beta.patch) (author: Dave Hayden)
@@ -131,8 +131,8 @@ deserve most of the credit for this work.
 
 This repo is largely equivalent to [scratchminer/lua](https://github.com/scratchminer/lua54)
 but is maintained as a set of explicit patches to be applied to
-[upstream v5.4.0](https://github.com/lua/lua/releases/tag/v5.4.0)
-rather than git commits added onto a fork from the same.
+[upstream v5.4.3](https://github.com/lua/lua/releases/tag/v5.4.3) tarballs
+rather than git commits added onto a fork from v5.4.0.
 
 See also: [jaames/playdate-reverse-engineering/](https://github.com/cranksters/playdate-reverse-engineering)
 which includes all sorts of internal playdate details including [formats/luac](https://github.com/cranksters/playdate-reverse-engineering/blob/main/formats/luac.md) documentation.

@@ -1,18 +1,19 @@
 #!/bin/sh
 set -e
 
-PATCH_DIR="$1"
-if [ -z "$PATCH_DIR" ]; then
-  echo "usage: apply-patches.sh <patch-dir>" >&2
+PATCH_DIR="$(dirname "$0")"
+SRC_DIR="$1"
+if [ -z "$SRC_DIR" ]; then
+  echo "usage: apply-patches.sh <src-dir>" >&2
   exit 1
 fi
 
 apply_patch() {
-  marker="src/.patched_$1"
+  marker="$SRC_DIR/.patched_$1"
   patch_file="$PATCH_DIR/$2"
   patch_dir="$3"
   if [ -z "$patch_dir" ]; then
-    patch_dir="src"
+    patch_dir="$SRC_DIR"
   fi
   if [ ! -f "$marker" ]; then
     patch --batch -p1 -d "$patch_dir" < "$patch_file"
@@ -20,6 +21,7 @@ apply_patch() {
   fi
 }
 
-apply_patch "scratchminer_lua54" "scratchminer_lua54.patch" "src"
-apply_patch "compound_assign" "compound-assign.patch" "src"
-apply_patch "table_additions" "table-additions.patch" "src"
+apply_patch "lua32" "lua32.patch" "$SRC_DIR"
+apply_patch "scratchminer" "scratchminer.patch" "$SRC_DIR"
+apply_patch "compound_assign" "compound-assign.patch" "$SRC_DIR"
+apply_patch "table_additions" "table-additions.patch" "$SRC_DIR"

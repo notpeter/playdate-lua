@@ -1,6 +1,8 @@
+diff --git a/llex.c b/llex.c
+index e9915178..87d12385 100644
 --- a/llex.c
 +++ b/llex.c
-@@ -44,7 +44,8 @@
+@@ -44,7 +44,8 @@ static const char *const luaX_tokens [] = {
      "return", "then", "true", "until", "while",
      "//", "..", "...", "==", ">=", "<=", "~=",
      "<<", ">>", "::", "<eof>",
@@ -10,7 +12,7 @@
  };
  
  
-@@ -453,6 +454,7 @@
+@@ -456,6 +457,7 @@ static int llex (LexState *ls, SemInfo *seminfo) {
        }
        case '-': {  /* '-' or '--' (comment) */
          next(ls);
@@ -18,37 +20,37 @@
          if (ls->current != '-') return '-';
          /* else is a comment */
          next(ls);
-@@ -488,19 +490,59 @@
+@@ -491,20 +493,60 @@ static int llex (LexState *ls, SemInfo *seminfo) {
        case '<': {
          next(ls);
-         if (check_next1(ls, '=')) return TK_LE;
--        else if (check_next1(ls, '<')) return TK_SHL;
+         if (check_next1(ls, '=')) return TK_LE;  /* '<=' */
+-        else if (check_next1(ls, '<')) return TK_SHL;  /* '<<' */
 +        else if (check_next1(ls, '<')) {
-+          if (check_next1(ls, '=')) return TK_SHLEQ;
-+          else return TK_SHL;
++          if (check_next1(ls, '=')) return TK_SHLEQ;  /* '<<=' */
++          else return TK_SHL;  /* '<<' */
 +        }
          else return '<';
        }
        case '>': {
          next(ls);
-         if (check_next1(ls, '=')) return TK_GE;
--        else if (check_next1(ls, '>')) return TK_SHR;
+         if (check_next1(ls, '=')) return TK_GE;  /* '>=' */
+-        else if (check_next1(ls, '>')) return TK_SHR;  /* '>>' */
 +        else if (check_next1(ls, '>')) {
-+          if (check_next1(ls, '=')) return TK_SHREQ;
-+          else return TK_SHR;
++          if (check_next1(ls, '=')) return TK_SHREQ;  /* '>>=' */
++          else return TK_SHR;  /* '>>' */
 +        }
          else return '>';
        }
        case '/': {
          next(ls);
--        if (check_next1(ls, '/')) return TK_IDIV;
+-        if (check_next1(ls, '/')) return TK_IDIV;  /* '//' */
 +        if (check_next1(ls, '/')) {
-+          if (check_next1(ls, '=')) return TK_IDIVEQ;
-+          else return TK_IDIV;
++          if (check_next1(ls, '=')) return TK_IDIVEQ;  /* '//=' */
++          else return TK_IDIV;  /* '//' */
 +        }
-+        if (check_next1(ls, '=')) return TK_DIVEQ;
++        if (check_next1(ls, '=')) return TK_DIVEQ;  /* '/=' */
          else return '/';
-+      }
+       }
 +      case '+': {
 +        next(ls);
 +        if (check_next1(ls, '=')) return TK_PLUSEQ;
@@ -78,12 +80,20 @@
 +        next(ls);
 +        if (check_next1(ls, '=')) return TK_BXOREQ;
 +        else return '^';
-       }
++      }
        case '~': {
          next(ls);
+         if (check_next1(ls, '=')) return TK_NE;  /* '~=' */
+@@ -578,4 +620,3 @@ int luaX_lookahead (LexState *ls) {
+   ls->lookahead.token = llex(ls, &ls->lookahead.seminfo);
+   return ls->lookahead.token;
+ }
+-
+diff --git a/llex.h b/llex.h
+index 389d2f86..16a64ab4 100644
 --- a/llex.h
 +++ b/llex.h
-@@ -33,7 +33,8 @@
+@@ -39,7 +39,8 @@ enum RESERVED {
    TK_IDIV, TK_CONCAT, TK_DOTS, TK_EQ, TK_GE, TK_LE, TK_NE,
    TK_SHL, TK_SHR,
    TK_DBCOLON, TK_EOS,
@@ -93,9 +103,11 @@
  };
  
  /* number of reserved words */
+diff --git a/lparser.c b/lparser.c
+index 284ef1f0..e85c83fe 100644
 --- a/lparser.c
 +++ b/lparser.c
-@@ -1216,6 +1216,17 @@
+@@ -1214,6 +1214,17 @@ static BinOpr getbinopr (int op) {
      case TK_GE: return OPR_GE;
      case TK_AND: return OPR_AND;
      case TK_OR: return OPR_OR;
@@ -113,7 +125,7 @@
      default: return OPR_NOBINOPR;
    }
  }
-@@ -1355,12 +1366,55 @@
+@@ -1353,12 +1364,55 @@ static void check_conflict (LexState *ls, struct LHS_assign *lh, expdesc *v) {
    }
  }
  
@@ -170,7 +182,7 @@
  */
  static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
    expdesc e;
-@@ -1376,10 +1430,8 @@
+@@ -1374,10 +1428,8 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
      restassign(ls, &nv, nvars+1);
      leavelevel(ls);
    }
@@ -183,19 +195,19 @@
      if (nexps != nvars)
        adjust_assign(ls, nvars, nexps, &e);
      else {
-@@ -1387,6 +1439,11 @@
-       luaK_storevar(ls->fs, &lh->v, &e);
+@@ -1386,6 +1438,11 @@ static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
        return;  /* avoid default */
      }
-+  }
+   }
 +  else if ( (ls->t.token >= TK_PLUSEQ && ls->t.token <= TK_BXOREQ) || ls->t.token == TK_IDIVEQ || ls->t.token == TK_MODEQ ) { /* restassign -> opeq expr */
 +	  check_condition(ls, nvars == 1, "compound assignment not allowed on tuples");
 +	  compound_assignment(ls,&lh->v);
 +      return;
-   }
++  }
    init_exp(&e, VNONRELOC, ls->fs->freereg-1);  /* default assignment */
    luaK_storevar(ls->fs, &lh->v, &e);
-@@ -1826,7 +1883,7 @@
+ }
+@@ -1786,7 +1843,7 @@ static void exprstat (LexState *ls) {
    FuncState *fs = ls->fs;
    struct LHS_assign v;
    suffixedexp(ls, &v.v);
