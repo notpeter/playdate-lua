@@ -2,13 +2,13 @@ cmake_minimum_required(VERSION 3.24.0)
 cmake_policy(VERSION 3.24.0)
 include(ExternalProject)
 
-project(playdate-lua LANGUAGES C VERSION 5.4.0)
+project(playdate-lua LANGUAGES C VERSION 5.4.3)
 
 ExternalProject_Add(lua
-  URL "https://www.lua.org/ftp/lua-5.4.0.tar.gz"
-  URL_HASH "SHA256=eac0836eb7219e421a96b7ee3692b93f0629e4cdb0c788432e3d10ce9ed47e28"
+  URL "https://www.lua.org/ftp/lua-5.4.3.tar.gz"
+  URL_HASH "SHA256=f8612276169e3bfcbcfb8f226195bfc6e466fe13042f1076cbde92b7ec96bbfb"
   CONFIGURE_COMMAND ""
-  PATCH_COMMAND /bin/sh ${CMAKE_CURRENT_LIST_DIR}/patch/apply-patches.sh ${CMAKE_CURRENT_LIST_DIR}/patch
+  # PATCH_COMMAND /bin/sh ${CMAKE_CURRENT_LIST_DIR}/patch/apply-patches.sh <SOURCE_DIR>/src
   BUILD_COMMAND make generic MYCFLAGS=-DLUA_32BITS
   BUILD_ALWAYS true
   BUILD_IN_SOURCE true

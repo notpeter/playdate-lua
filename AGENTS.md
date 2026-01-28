@@ -7,32 +7,25 @@ This closed source, but we attempt to closely mirror its functionality here.
 
 ## Build instructions
 
-### Compile with:
+Compile with: `./build.sh build`
+Clean with: `./build.sh clean`
+Test with: `./build.sh test`
 
-```
-cd build
-cmake ..
-make
-```
+Clean will clear the contents of the `build` subdir with `git clean -fdx build`
 
 ### Build output
 
 build/lua-prefix/src/lua/src/lua
 build/lua-prefix/src/lua/src/luac
 
-### Clean
-
-Clean by reseting the build dir:
-
-```sh
-git clean -fdx build
-```
-
 ## Patches:
 
-- scratchminer_lua54.diff: Enables backwards support for Lua byte code compiled with 5.4.0-beta
+See: `patch/apply-patches.sh` for how patches are applied.
+
+- `patch/scratchminer_lua54.patch`: Enables backwards support for Lua byte code compiled with 5.4.0-beta
   - Adds `OP_LOADBOOL` which was included 5.4.0-beta but removed in 5.4.0
   - Support alternate magic bytes from beta release
   - Support alternate byte code numbering ordering used by old bytecode
-- table-additions.patch: Adds Playdate-specific table helpers
+- `patch/table-additions.patch`: Adds Playdate-specific table helpers
   - `table.indexOfElement`, `table.getsize`, `table.create`, `table.shallowcopy`, `table.deepcopy`
+- `patch/compound-assign.patch`: Enables compound assignment operators
